@@ -4,22 +4,31 @@ export default function SiteFooter() {
     return (
         <footer className="border-t border-white/10 bg-zinc-950">
             <div className="mx-auto w-full max-w-6xl px-4 py-10">
-                <div className="grid gap-6 md:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-4">
                     <div>
-                        <div className="text-sm font-semibold">Cubed</div>
+                        <div className="text-m font-semibold">Cubed</div>
                         <p className="mt-2 text-sm text-zinc-400">
-                            Minecraft-style voxels, Roblox-style networking — cozy, social worlds.
+                            Voxel sandbox for everyone.
                         </p>
+                        <div className="mt-2 flex gap-2 text-zinc-100">
+                            <Link href="/account/usage-guidelines">Usage Guidelines</Link>
+                            <Link href="/">Manage Consent</Link>
+                        </div>
                     </div>
 
                     <div className="text-sm">
-                        <div className="font-semibold">Pages</div>
+                        <div className="font-semibold">Account</div>
                         <div className="mt-2 grid gap-1 text-zinc-300">
-                            <Link href="/discover">Discover</Link>
-                            <Link href="/media">Media</Link>
-                            <Link href="/devlog">Devlog</Link>
-                            <Link href="/community">Community</Link>
-                            <Link href="/playtest">Playtest</Link>
+                            <Link href="/account">Profile</Link>
+                            <Link href="/redeem">Redeem</Link>
+                        </div>
+                    </div>
+
+                    <div className="text-sm">
+                        <div className="font-semibold">Shop</div>
+                        <div className="mt-2 grid gap-1 text-zinc-300">
+                            <Link href="/marketplace">Marketplace</Link>
+                            <Link href="/giftcards">Giftcards</Link>
                         </div>
                     </div>
 
@@ -29,6 +38,25 @@ export default function SiteFooter() {
                             <Link href="/legal/terms">Terms</Link>
                             <Link href="/legal/privacy">Privacy</Link>
                             <Link href="/legal/eula">EULA</Link>
+                        </div>
+                    </div>
+
+                    <div className="text-sm">
+                        <div className="font-semibold">- - -</div>
+                        <div className="mt-2 grid gap-1 text-zinc-300">
+                            <Link href="/secret">‎ </Link>
+                        </div>
+                    </div>
+
+                    <div className="text-sm">
+                        <div className="font-semibold">Support</div>
+                        <div className="mt-2 grid gap-1 text-zinc-300">
+                            <Link href="/support/players">Tips for Players</Link>
+                            <Link href="/support/devs">Tips for Developers</Link>
+                            <Link href="/support/feedback">Feedback</Link>
+                            <Link href="/support/sitemap">Site Map</Link>
+                            <Link href="/support/download">Download</Link>
+                            <Link href="/support/contact">Contact Us</Link>
                         </div>
                     </div>
                 </div>
