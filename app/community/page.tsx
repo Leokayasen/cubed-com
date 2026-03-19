@@ -1,8 +1,7 @@
 const links = [
-    { name: "Discord", href: "#", note: "Add your invite link later" },
+    { name: "Discord", href: "#", note: "Announcements, community chats, etc" },
     { name: "YouTube", href: "#", note: "Dev videos, trailers" },
-    { name: "TikTok", href: "#", note: "Short clips" },
-    { name: "X (Twitter)", href: "#", note: "Updates + screenshots" },
+    { name: "Bluesky", href: "#", note: "Announcements" },
 ];
 
 export default function CommunityPage() {
