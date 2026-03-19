@@ -1,0 +1,61 @@
+---
+title: Devlog for v0.1.8
+date: 2026-03-19
+summary: A major structural update with the introduction of a new API module and groundwork for world generation.
+---
+
+# Devlog - v0.1.8
+
+This update focuses on a major structural shift for the project, plus early groundwork for world generation and modding APIs.
+
+## Highlights
+
+- **Project split into modules:** The codebase is now separated into `engine` (core runtime) and `api` (public interfaces for modding and scripting).
+- **Build setup updated:** Added dedicated Gradle configuration for multi-module development (`root`, `engine`, and `api`).
+- **API foundation added:** Introduced first-pass API types for scripting/runtime integration, including:
+  - `ScriptContext`
+  - `ExecutionSide`
+  - `PlatformInfo`
+  - `WorldApi`
+  - `Time`
+  - `Result`
+  - `ModLogger`
+- **Scripting direction documented:** Added `CHISEL_SCRIPT.md` to outline the plan for the upcoming scripting language.
+
+## Engine and World Work
+
+- Added `World` and `WorldChunkGenerator` to formalize world ownership and chunk generation flow.
+- Added `NoiseGenerator` for terrain and cave sampling (Perlin-style approach), which sets up more realistic procedural generation.
+
+## Refactor Pass
+
+A broad package/path reorganization moved key classes into the `engine` module namespace and improved naming consistency/accessibility across systems. This includes updates around:
+
+- window/bootstrap and application entry
+- rendering and graphics primitives
+- scene graph/components/transform handling
+- input and keybind flow
+- world IO and NBT support
+- game state management
+
+Notable internal cleanup also removed outdated notes/docs that no longer matched the current structure.
+
+## Documentation Updates
+
+- Updated `README.md` with `v0.1.8-rc-1` notes.
+- Clarified the module split and the new scripting-language direction.
+
+## Commit Rollup (Recent)
+
+- `bf7bd20` removed old/outdated notes
+- `89d0516` docs: README update for `v0.1.8-rc-1`
+- `be509e8` Gradle scripts for `engine`, `api`, and root
+- `d2b7a92` API interfaces and enums added
+- `ceca11d` world/chunk generation classes added
+- `4ff8014` `NoiseGenerator` added
+- `08d3326`, `18178f9`, `ee847d3`, `4b2547b`, `9acd119`, `fb582ec`, `9f990a2`, `7b5c449`, `7fe6483` refactor/rename and package-structure cleanup
+
+## Why this matters
+
+This release candidate is less about user-facing polish and more about establishing a cleaner architecture for future features. Splitting `api` from `engine` makes modding integrations safer and easier to evolve, while the new worldgen building blocks prepare the path toward richer procedural terrain.
+
