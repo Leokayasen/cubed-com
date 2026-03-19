@@ -14,7 +14,7 @@ export default function CommunityPage() {
                 </p>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-3">
                 {links.map((l) => (
                     <a key={l.name} href={l.href} className="container-soft p-6 hover:bg-white/10">
                         <div className="text-sm font-semibold">{l.name}</div>
