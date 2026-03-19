@@ -16,7 +16,7 @@ export default function HomePage() {
                 <div className="grid gap-6 p-6 md:grid-cols-2 md:items-center md:p-10">
                     <div>
                         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                            Upcoming voxel game • Dark mode default
+                            Upcoming voxel game
                         </div>
                         <h1 className="mt-4 text-3xl font-semibold tracking-tight md:text-5xl">
                             Cubed — cozy voxel worlds you can share.
