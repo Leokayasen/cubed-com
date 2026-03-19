@@ -1,0 +1,53 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum SubmissionStatus {
+    RECEIVED
+    NOTIFIED
+    NOTIFY_FAILED
+    SPAM_REJECTED
+}
+
+model PlaytestSubmission {
+    id             String           @id @default(cuid())
+    name           String
+    email          String
+    discord        String
+    platform       String
+    notes          String
+    status         SubmissionStatus @default(RECEIVED)
+    notifyError    String?
+    sourceIp       String?
+    userAgent      String?
+    idempotencyKey String?
+    createdAt      DateTime         @default(now())
+    updatedAt      DateTime         @updatedAt
+
+    @@index([createdAt])
+    @@index([email])
+}
+
+model FeedbackSubmission {
+    id             String           @id @default(cuid())
+    title          String
+    category       String
+    details        String
+    email          String
+    status         SubmissionStatus @default(RECEIVED)
+    notifyError    String?
+    sourceIp       String?
+    userAgent      String?
+    idempotencyKey String?
+    createdAt      DateTime         @default(now())
+    updatedAt      DateTime         @updatedAt
+
+    @@index([createdAt])
+    @@index([category])
+}
+
