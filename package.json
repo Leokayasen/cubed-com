@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "backend:smoke": "tsx scripts/backend-smoke.ts"
   },
   "dependencies": {
