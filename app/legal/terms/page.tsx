@@ -1,12 +1,29 @@
-export default function TermsPage() {
-  return (
-    <div className="grid gap-6">
-      <h1 className="text-3xl font-semibold">Terms</h1>
-      <div className="container-soft p-6 md:p-10">
-        <p className="text-zinc-300">
-          Placeholder terms for Cubed. Replace with real terms before launch.
-        </p>
-      </div>
-    </div>
-  );
+import { getLegalMarkdown } from "@/lib/legal";
+import { notFound } from "next/navigation";
+import { compileMDX } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
+
+export default async function TermsPage() {
+    const source = await getLegalMarkdown("terms");
+    if (!source) return notFound();
+
+    const { content } = await compileMDX({
+        source,
+        options: {
+            parseFrontmatter: false,
+            mdxOptions: {
+                remarkPlugins: [remarkGfm],
+                rehypePlugins: [rehypeSanitize],
+            },
+        },
+    });
+
+    return (
+        <article className="grid gap-6">
+            <div className="container-soft p-6 md:p-10">
+                <div className="prose prose-invert max-w-none devlog-prose">{content}</div>
+            </div>
+        </article>
+    );
 }
