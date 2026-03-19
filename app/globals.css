@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    @apply text-zinc-100 hover:text-white;
+}
+
+.container-soft {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur;
+}
+
+.muted {
+    @apply text-zinc-300;
+}
+
+.btn {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium transition;
+}
+
+.btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-emerald-500 px-4 py-2 font-medium text-zinc-950 transition hover:bg-emerald-400;
+}
+
+.btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 font-medium transition hover:bg-white/10;
+}
