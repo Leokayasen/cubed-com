@@ -16,14 +16,22 @@ export default function HomePage() {
                 <div className="grid gap-6 p-6 md:grid-cols-2 md:items-center md:p-10">
                     <div>
                         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                            Upcoming voxel game
+                            COMING SOON
                         </div>
                         <h1 className="mt-4 text-3xl font-semibold tracking-tight md:text-5xl">
                             Cubed — cozy voxel worlds you can share.
                         </h1>
+
                         <p className="mt-4 text-zinc-300">
-                            Minecraft-visual building, Roblox-style networking. Join friends, host worlds,
-                            and shape biomes together. (All placeholder for now.)
+                            Build cozy worlds with friends.
+                            Explore together. Share your creations.
+                            Cubed is a new kind of voxel sandbox,
+                            designed for easy multiplayer fun and endless creativity.
+                        </p>
+
+                        <p className="mt-4 text-zinc-300">
+                            We’re in early development and would love your feedback as we build
+                            — join the playtest list to get involved!
                         </p>
 
                         <div className="mt-6 flex flex-wrap gap-3">
@@ -62,15 +70,15 @@ export default function HomePage() {
                 {[
                     {
                         title: "Build fast",
-                        body: "Snap blocks, paint materials, and craft cozy structures. (Placeholder)",
+                        body: "Place blocks and craft cozy structures.",
                     },
                     {
                         title: "Play together",
-                        body: "Shared worlds with friends — social by design. (Placeholder)",
+                        body: "Shared worlds with friends — social by design.",
                     },
                     {
                         title: "Explore biomes",
-                        body: "Moody forests, warm caves, and soft night skies. (Placeholder)",
+                        body: "Moody forests, warm caves, and soft night skies.",
                     },
                 ].map((c) => (
                     <div key={c.title} className="container-soft p-6">
