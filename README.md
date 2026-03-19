@@ -16,6 +16,8 @@ The site now includes a Phase 1 backend for playtest and feedback submissions.
 
 Detailed setup instructions live in [`docs/backend.md`](docs/backend.md).
 
+Important: after deploying env vars, run `npm run db:deploy` against production (or include it in Vercel Build Command) so submission tables exist.
+
 ## Playtest Discord Webhook Setup
 
 Playtest submissions from `/playtest` can be forwarded to a Discord channel using a webhook.
