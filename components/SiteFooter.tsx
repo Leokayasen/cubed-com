@@ -28,6 +28,7 @@ export default function SiteFooter() {
                         <div className="mt-2 grid gap-1 text-zinc-300">
                             <Link href="/legal/terms">Terms</Link>
                             <Link href="/legal/privacy">Privacy</Link>
+                            <Link href="/legal/eula">EULA</Link>
                         </div>
                     </div>
                 </div>
