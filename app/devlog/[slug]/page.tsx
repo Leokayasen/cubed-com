@@ -60,7 +60,7 @@ export default async function DevlogPostPage({
             </div>
 
             <div className="container-soft p-6 md:p-10">
-                <div className="prose prose-invert max-w-none">
+                <div className="prose prose-invert max-w-none devlog-prose">
                     {content}
                 </div>
             </div>
