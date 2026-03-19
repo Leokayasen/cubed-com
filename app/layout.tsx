@@ -5,13 +5,13 @@ import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
     title: {
-        default: "Cubed — Cozy Voxel Adventure",
+        default: "Cubed — Voxel Sandbox",
         template: "%s · Cubed",
     },
     description:
         "Cubed is an upcoming voxel game with Minecraft-style visuals and Roblox-style networking.",
     icons: {
-        icon: "/favicon.ico",
+        icon: "/logo.png",
     },
 };
 
