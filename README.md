@@ -12,6 +12,8 @@ The site now includes a Phase 1 backend for playtest and feedback submissions.
 
 - Prisma + Postgres persistence
 - Discord webhook notifications
+- Account creation with email, username, password, and optional Cubed username reservation
+- Session-based login/logout with account state endpoint
 - Basic admin read endpoint
 
 Detailed setup instructions live in [`docs/backend.md`](docs/backend.md).

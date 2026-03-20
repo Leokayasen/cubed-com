@@ -4,6 +4,12 @@ This project now has a basic backend foundation for submissions:
 
 - `POST /api/playtest` stores submissions in Postgres and forwards to Discord webhook.
 - `POST /api/feedback` stores submissions in Postgres and forwards to Discord webhook.
+- `GET /api/account/username` checks whether a username is available.
+- `POST /api/account/profile` reserves a username for an email.
+- `POST /api/account/register` creates an account with email, username, and password.
+- `POST /api/account/login` authenticates and creates a session cookie.
+- `POST /api/account/logout` clears the active session.
+- `GET /api/account/me` returns the current signed-in account from session.
 - `GET /api/admin/submissions` returns recent submissions when `x-admin-token` is valid.
 
 ## Environment Variables
@@ -52,5 +58,5 @@ npm run backend:smoke
 curl -H "x-admin-token: YOUR_ADMIN_API_TOKEN" "http://localhost:3000/api/admin/submissions?type=feedback&limit=25"
 ```
 
-Use `type=playtest` or omit `type` to fetch both.
+Use `type=playtest`, `type=feedback`, `type=profiles`, `type=accounts`, or omit `type` to fetch all.
 
