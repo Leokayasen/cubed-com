@@ -10,12 +10,19 @@ const LEGAL_FILES = {
 type LegalDocument = keyof typeof LEGAL_FILES;
 
 export async function getLegalMarkdown(document: LegalDocument): Promise<string | null> {
-    const filePath = path.join(process.cwd(), LEGAL_FILES[document]);
+    const candidates = [
+        path.join(process.cwd(), LEGAL_FILES[document]),
+        path.join(process.cwd(), "docs", LEGAL_FILES[document]),
+    ];
 
-    try {
-        return await readFile(filePath, "utf-8");
-    } catch {
-        return null;
+    for (const filePath of candidates) {
+        try {
+            return await readFile(filePath, "utf-8");
+        } catch {
+            // Try the next candidate location.
+        }
     }
+
+    return null;
 }
 
