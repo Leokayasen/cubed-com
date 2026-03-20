@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import NavLink from "@/components/NavLink";
+import AccountHeaderButton from "@/components/AccountHeaderButton";
 
 export default function SiteHeader() {
     return (
@@ -34,6 +35,7 @@ export default function SiteHeader() {
                 </nav>
 
                 <div className="flex items-center gap-2">
+                    <AccountHeaderButton />
                     <Link className="btn-ghost text-sm" href="/playtest">
                         Get updates
                     </Link>
