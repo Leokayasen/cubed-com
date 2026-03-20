@@ -1,3 +1,9 @@
+import {
+    hashPassword,
+    validateAccountProfileReservation,
+    validateAccountRegistration,
+    verifyPassword,
+} from "@/lib/account";
 import { validateFeedbackSubmission } from "@/lib/feedback";
 import { rateLimitByKey } from "@/lib/server/request";
 import { validatePlaytestSubmission } from "@/lib/playtest";
@@ -27,6 +33,20 @@ function runValidationChecks() {
         website: "",
     });
     assert(feedback.ok, "Expected feedback validation to pass");
+
+    const account = validateAccountProfileReservation({
+        username: "Player_Kaiya",
+        email: "kaiya@example.com",
+    });
+    assert(account.ok, "Expected account profile validation to pass");
+
+    const registration = validateAccountRegistration({
+        username: "Player_Kaiya",
+        email: "kaiya@example.com",
+        password: "SecurePass123",
+        reserveCubedUsername: true,
+    });
+    assert(registration.ok, "Expected account registration validation to pass");
 }
 
 function runRateLimitCheck() {
@@ -40,11 +60,21 @@ function runRateLimitCheck() {
     assert(!third.allowed, "Third request should be blocked");
 }
 
-function run() {
+async function runPasswordCheck() {
+    const hash = await hashPassword("SecurePass123");
+    const valid = await verifyPassword("SecurePass123", hash);
+    const invalid = await verifyPassword("WrongPass123", hash);
+
+    assert(valid, "Expected password verification to pass");
+    assert(!invalid, "Expected invalid password verification to fail");
+}
+
+async function run() {
     runValidationChecks();
     runRateLimitCheck();
+    await runPasswordCheck();
     console.log("Backend smoke checks passed.");
 }
 
-run();
+void run();
 
