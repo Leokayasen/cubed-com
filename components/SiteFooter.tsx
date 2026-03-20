@@ -27,8 +27,8 @@ export default function SiteFooter() {
                     <div className="text-sm">
                         <div className="font-semibold">Shop</div>
                         <div className="mt-2 grid gap-1 text-zinc-300">
-                            <Link href="/marketplace">Marketplace</Link>
-                            <Link href="/giftcards">Giftcards</Link>
+                            <Link href="/shop/marketplace">Marketplace</Link>
+                            <Link href="/shop/giftcards">Giftcards</Link>
                         </div>
                     </div>
 
@@ -45,18 +45,33 @@ export default function SiteFooter() {
                         <div className="font-semibold">- - -</div>
                         <div className="mt-2 grid gap-1 text-zinc-300">
                             <Link href="/secret">‎ </Link>
+                            <Link href="/sitemap">Site Map</Link>
                         </div>
                     </div>
 
                     <div className="text-sm">
                         <div className="font-semibold">Support</div>
                         <div className="mt-2 grid gap-1 text-zinc-300">
+                            <Link href="/support">Support Center</Link>
                             <Link href="/support/players">Tips for Players</Link>
                             <Link href="/support/devs">Tips for Developers</Link>
                             <Link href="/support/feedback">Feedback</Link>
-                            <Link href="/support/sitemap">Site Map</Link>
                             <Link href="/support/download">Download</Link>
                             <Link href="/support/contact">Contact Us</Link>
+                        </div>
+                    </div>
+
+                    <div className="text-sm">
+                        <div className="font-semibold">Resources</div>
+                        <div className="mt-2 grid gap-1 text-zinc-300">
+                            <Link href="/press-kit">Press Kit</Link>
+                        </div>
+                    </div>
+
+                    <div className="text-sm">
+                        <div className="font-semibold">Explore</div>
+                        <div className="mt-2 grid gap-1 text-zinc-300">
+                            <Link href="/creator-hub">Creator Hub</Link>
                         </div>
                     </div>
                 </div>
