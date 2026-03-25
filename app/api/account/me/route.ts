@@ -1,6 +1,8 @@
+// GET /api/account/me
 import {
     getAccountFromSessionToken,
     getSessionTokenFromCookieHeader,
+    refreshSessionIfNeeded,
     SESSION_COOKIE_NAME,
 } from "@/lib/server/auth";
 import { NextResponse } from "next/server";
@@ -19,7 +21,7 @@ export async function GET(request: Request) {
             name: SESSION_COOKIE_NAME,
             value: "",
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
             sameSite: "lax",
             path: "/",
             maxAge: 0,
@@ -27,14 +29,30 @@ export async function GET(request: Request) {
         return response;
     }
 
-    return NextResponse.json({
+    // Slide session expiry if needed
+    const newExpiry = await refreshSessionIfNeeded(session.sessionId, session.expiresAt);
+
+    const response = NextResponse.json({
         ok: true,
         authenticated: true,
         account: session.account,
         session: {
             id: session.sessionId,
-            expiresAt: session.expiresAt,
+            expiresAt: (newExpiry ?? session.expiresAt).toISOString(),
         },
     });
-}
 
+    if (newExpiry) {
+        response.cookies.set({
+            name: SESSION_COOKIE_NAME,
+            value: token,
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            expires: newExpiry,
+        });
+    }
+
+    return response;
+}

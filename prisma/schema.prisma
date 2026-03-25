@@ -7,6 +7,10 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
 enum SubmissionStatus {
     RECEIVED
     NOTIFIED
@@ -14,54 +18,122 @@ enum SubmissionStatus {
     SPAM_REJECTED
 }
 
+enum AccountRole {
+    USER
+    ADMIN
+}
+
+enum KeyType {
+    GAME
+    PLAYTEST
+    DLC
+}
+
+// ---------------------------------------------------------------------------
+// Username reservation (pre-registration hold)
+// ---------------------------------------------------------------------------
+
 model AccountProfile {
-    id                 String   @id @default(cuid())
+    id                 String      @id @default(cuid())
     username           String
-    usernameNormalized String   @unique
-    email              String   @unique
-    accountId          String?  @unique
+    usernameNormalized String      @unique
+    emailNormalized    String      @unique           // was: email — now always stored normalised
+    accountId          String?     @unique
     sourceIp           String?
     userAgent          String?
-    createdAt          DateTime @default(now())
-    updatedAt          DateTime @updatedAt
+    createdAt          DateTime    @default(now())
+    updatedAt          DateTime    @updatedAt
 
     account            UserAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
 
     @@index([createdAt])
 }
 
-model UserAccount {
-    id                  String   @id @default(cuid())
-    email               String
-    emailNormalized     String   @unique
-    username            String
-    usernameNormalized  String   @unique
-    passwordHash        String
-    reserveCubedUsername Boolean @default(false)
-    createdAt           DateTime @default(now())
-    updatedAt           DateTime @updatedAt
+// ---------------------------------------------------------------------------
+// Core account
+// ---------------------------------------------------------------------------
 
-    profileReservation  AccountProfile?
-    sessions            UserSession[]
+model UserAccount {
+    id                   String      @id @default(cuid())
+    email                String                          // display email (as entered)
+    emailNormalized      String      @unique
+    username             String
+    usernameNormalized   String      @unique
+    passwordHash         String
+    role                 AccountRole @default(USER)
+
+    // Email verification
+    emailVerified        Boolean     @default(false)
+    emailVerifyToken     String?                         // hashed — raw token sent by email
+    emailVerifyExpiry    DateTime?
+
+    // Password reset
+    passwordResetToken   String?                         // hashed
+    passwordResetExpiry  DateTime?
+
+    reserveCubedUsername Boolean     @default(false)
+    createdAt            DateTime    @default(now())
+    updatedAt            DateTime    @updatedAt
+
+    profileReservation   AccountProfile?
+    sessions             UserSession[]
+    redemptions          KeyRedemption[]
 
     @@index([createdAt])
 }
 
-model UserSession {
-    id            String      @id @default(cuid())
-    accountId     String
-    tokenHash     String      @unique
-    expiresAt     DateTime
-    sourceIp      String?
-    userAgent     String?
-    createdAt     DateTime    @default(now())
-    updatedAt     DateTime    @updatedAt
+// ---------------------------------------------------------------------------
+// Sessions
+// ---------------------------------------------------------------------------
 
-    account       UserAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+model UserSession {
+    id          String      @id @default(cuid())
+    accountId   String
+    tokenHash   String      @unique
+    expiresAt   DateTime
+    sourceIp    String?
+    userAgent   String?
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    account     UserAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
     @@index([accountId])
     @@index([expiresAt])
 }
+
+// ---------------------------------------------------------------------------
+// Game keys & redemptions
+// ---------------------------------------------------------------------------
+
+model GameKey {
+    id          String        @id @default(cuid())
+    codeHash    String        @unique             // SHA-256 of the raw key code
+    keyType     KeyType       @default(GAME)
+    note        String?                           // admin label e.g. "press batch 1"
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+
+    redemption  KeyRedemption?
+
+    @@index([createdAt])
+}
+
+model KeyRedemption {
+    id          String      @id @default(cuid())
+    accountId   String
+    keyId       String      @unique              // one redemption per key
+    redeemedAt  DateTime    @default(now())
+
+    account     UserAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+    key         GameKey     @relation(fields: [keyId], references: [id])
+
+    @@index([accountId])
+}
+
+// ---------------------------------------------------------------------------
+// Existing models — unchanged
+// ---------------------------------------------------------------------------
 
 model PlaytestSubmission {
     id             String           @id @default(cuid())
@@ -99,4 +171,3 @@ model FeedbackSubmission {
     @@index([createdAt])
     @@index([category])
 }
-

@@ -1,4 +1,4 @@
-import { validateUsername } from "@/lib/account";
+import { validateUsername } from "@/lib/account/account";
 import { prisma } from "@/lib/server/prisma";
 import { NextResponse } from "next/server";
 

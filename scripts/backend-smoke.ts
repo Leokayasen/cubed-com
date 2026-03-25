@@ -3,7 +3,7 @@ import {
     validateAccountProfileReservation,
     validateAccountRegistration,
     verifyPassword,
-} from "@/lib/account";
+} from "@/lib/account/account";
 import { validateFeedbackSubmission } from "@/lib/feedback";
 import { rateLimitByKey } from "@/lib/server/request";
 import { validatePlaytestSubmission } from "@/lib/playtest";

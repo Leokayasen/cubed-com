@@ -1,57 +1,33 @@
-import {
-    normalizeUsername,
-    validateAccountProfileReservation,
-} from "@/lib/account/account";
+// POST /api/account/reserve
+// Reserves a Cubed in-game username before full registration.
+import { normalizeEmail, normalizeUsername, validateAccountProfileReservation } from "@/lib/account";
 import { prisma } from "@/lib/server/prisma";
-import { getRequestMeta, rateLimitByKey } from "@/lib/server/request";
+import { rateLimit, RateLimits } from "@/lib/server/ratelimit";
+import { getRequestMeta } from "@/lib/server/request";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 5;
-
-function mapApiError(error: unknown) {
+function mapDbError(error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        return {
-            status: 409,
-            body: { error: "That username is already reserved." },
-        };
+        return { status: 409, body: { error: "That username is already reserved." } };
     }
-
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
-        return {
-            status: 503,
-            body: { error: "Database tables are not ready yet. Please try again shortly." },
-        };
+        return { status: 503, body: { error: "Database is not ready. Please try again shortly." } };
     }
-
     if (error instanceof Prisma.PrismaClientInitializationError) {
-        return {
-            status: 503,
-            body: { error: "Database connection failed. Please try again shortly." },
-        };
+        return { status: 503, body: { error: "Database connection failed. Please try again shortly." } };
     }
-
-    return {
-        status: 500,
-        body: { error: "Unexpected server error." },
-    };
+    return { status: 500, body: { error: "Unexpected server error." } };
 }
 
 export async function POST(request: Request) {
     const meta = getRequestMeta(request);
-    const rateKey = `account-profile:${meta.ip ?? "unknown"}`;
-    const rateResult = rateLimitByKey(rateKey, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
 
-    if (!rateResult.allowed) {
+    const rl = await rateLimit(meta.ip ?? "unknown", "profileReserve", RateLimits.profileReserve);
+    if (!rl.allowed) {
         return NextResponse.json(
-            { error: "Too many requests. Please wait a minute and try again." },
-            {
-                status: 429,
-                headers: {
-                    "Retry-After": String(Math.ceil((rateResult.resetAt - Date.now()) / 1000)),
-                },
-            }
+            { error: "Too many requests. Please wait a moment." },
+            { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds) } }
         );
     }
 
@@ -67,38 +43,38 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
-    const normalizedUsername = normalizeUsername(parsed.data.username);
+    // Always use normalised email for storage and lookups
+    const emailNormalized = normalizeEmail(parsed.data.email);
+    const usernameNormalized = normalizeUsername(parsed.data.username);
 
     try {
         const existingByEmail = await prisma.accountProfile.findUnique({
-            where: { email: parsed.data.email },
+            where: { emailNormalized },
         });
 
         if (existingByEmail) {
-            if (existingByEmail.usernameNormalized === normalizedUsername) {
+            // Same email, same username — idempotent
+            if (existingByEmail.usernameNormalized === usernameNormalized) {
                 return NextResponse.json({
                     ok: true,
                     existing: true,
                     profile: {
                         id: existingByEmail.id,
                         username: existingByEmail.username,
-                        email: existingByEmail.email,
+                        email: existingByEmail.emailNormalized,
                         createdAt: existingByEmail.createdAt,
                     },
                 });
             }
 
             return NextResponse.json(
-                {
-                    error:
-                        "This email already has a reserved username. Contact support to change ownership.",
-                },
+                { error: "This email already has a reserved username. Contact support to change it." },
                 { status: 409 }
             );
         }
 
         const existingByUsername = await prisma.accountProfile.findUnique({
-            where: { usernameNormalized: normalizedUsername },
+            where: { usernameNormalized },
             select: { id: true },
         });
 
@@ -109,8 +85,8 @@ export async function POST(request: Request) {
         const profile = await prisma.accountProfile.create({
             data: {
                 username: parsed.data.username,
-                usernameNormalized: normalizedUsername,
-                email: parsed.data.email,
+                usernameNormalized,
+                emailNormalized,
                 sourceIp: meta.ip,
                 userAgent: meta.userAgent,
             },
@@ -121,14 +97,13 @@ export async function POST(request: Request) {
             profile: {
                 id: profile.id,
                 username: profile.username,
-                email: profile.email,
+                email: profile.emailNormalized,
                 createdAt: profile.createdAt,
             },
         });
     } catch (error) {
-        console.error("Account profile reservation failed", error);
-        const mapped = mapApiError(error);
+        console.error("Profile reservation failed", error);
+        const mapped = mapDbError(error);
         return NextResponse.json(mapped.body, { status: mapped.status });
     }
 }
-

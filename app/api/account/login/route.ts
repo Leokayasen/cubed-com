@@ -1,55 +1,30 @@
-import { normalizeEmailForStorage, validateAccountLogin, verifyPassword } from "@/lib/account";
+// POST /api/account/login
+import { normalizeEmail, validateAccountLogin, verifyPassword } from "@/lib/account";
 import { createSession, SESSION_COOKIE_NAME } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
-import { getRequestMeta, rateLimitByKey } from "@/lib/server/request";
+import { rateLimit, RateLimits } from "@/lib/server/ratelimit";
+import { getRequestMeta } from "@/lib/server/request";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 8;
-
-function mapApiError(error: unknown) {
+function mapDbError(error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
-        return {
-            status: 503,
-            body: { error: "Database tables are not ready yet. Please try again shortly." },
-        };
+        return { status: 503, body: { error: "Database is not ready. Please try again shortly." } };
     }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        return {
-            status: 503,
-            body: { error: "Login service is temporarily unavailable. Please try again shortly." },
-        };
-    }
-
     if (error instanceof Prisma.PrismaClientInitializationError) {
-        return {
-            status: 503,
-            body: { error: "Database connection failed. Please try again shortly." },
-        };
+        return { status: 503, body: { error: "Database connection failed. Please try again shortly." } };
     }
-
-    return {
-        status: 500,
-        body: { error: "Unexpected server error." },
-    };
+    return { status: 500, body: { error: "Unexpected server error." } };
 }
 
 export async function POST(request: Request) {
     const meta = getRequestMeta(request);
-    const rateKey = `account-login:${meta.ip ?? "unknown"}`;
-    const rateResult = rateLimitByKey(rateKey, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
 
-    if (!rateResult.allowed) {
+    const rl = await rateLimit(meta.ip ?? "unknown", "login", RateLimits.login);
+    if (!rl.allowed) {
         return NextResponse.json(
-            { error: "Too many requests. Please wait a minute and try again." },
-            {
-                status: 429,
-                headers: {
-                    "Retry-After": String(Math.ceil((rateResult.resetAt - Date.now()) / 1000)),
-                },
-            }
+            { error: "Too many login attempts. Please wait a moment and try again." },
+            { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds) } }
         );
     }
 
@@ -66,18 +41,30 @@ export async function POST(request: Request) {
     }
 
     try {
-        const emailNormalized = normalizeEmailForStorage(parsed.data.email);
-        const account = await prisma.userAccount.findUnique({
-            where: { emailNormalized },
-        });
+        const emailNormalized = normalizeEmail(parsed.data.email);
+        const account = await prisma.userAccount.findUnique({ where: { emailNormalized } });
 
-        if (!account) {
+        // Always run verifyPassword even if account is null to prevent timing attacks.
+        const dummyHash = "scrypt$16384$8$1$deadbeefdeadbeef$deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        const validPassword = account
+            ? await verifyPassword(parsed.data.password, account.passwordHash)
+            : await verifyPassword(parsed.data.password, dummyHash).then(() => false);
+
+        if (!account || !validPassword) {
             return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
         }
 
-        const validPassword = await verifyPassword(parsed.data.password, account.passwordHash);
-        if (!validPassword) {
-            return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+        // Gate on email verification
+        if (!account.emailVerified) {
+            return NextResponse.json(
+                {
+                    error: "Please verify your email address before signing in.",
+                    requiresVerification: true,
+                    // Include account ID so the client can offer a resend button
+                    accountId: account.id,
+                },
+                { status: 403 }
+            );
         }
 
         const session = await createSession({
@@ -92,6 +79,7 @@ export async function POST(request: Request) {
                 id: account.id,
                 username: account.username,
                 email: account.email,
+                role: account.role,
                 reserveCubedUsername: account.reserveCubedUsername,
             },
         });
@@ -100,7 +88,7 @@ export async function POST(request: Request) {
             name: SESSION_COOKIE_NAME,
             value: session.token,
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: true, // __Host- prefix requires secure
             sameSite: "lax",
             path: "/",
             expires: session.expiresAt,
@@ -108,9 +96,8 @@ export async function POST(request: Request) {
 
         return response;
     } catch (error) {
-        console.error("Account login failed", error);
-        const mapped = mapApiError(error);
+        console.error("Login failed", error);
+        const mapped = mapDbError(error);
         return NextResponse.json(mapped.body, { status: mapped.status });
     }
 }
-

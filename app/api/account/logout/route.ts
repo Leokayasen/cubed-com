@@ -1,3 +1,4 @@
+// POST /api/account/logout
 import {
     deleteSessionByToken,
     getSessionTokenFromCookieHeader,
@@ -9,7 +10,7 @@ export async function POST(request: Request) {
     const token = getSessionTokenFromCookieHeader(request.headers.get("cookie"));
 
     if (token) {
-        await deleteSessionByToken(token);
+        await deleteSessionByToken(token).catch(() => {});
     }
 
     const response = NextResponse.json({ ok: true });
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
         name: SESSION_COOKIE_NAME,
         value: "",
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
         sameSite: "lax",
         path: "/",
         maxAge: 0,
@@ -25,4 +26,3 @@ export async function POST(request: Request) {
 
     return response;
 }
-
